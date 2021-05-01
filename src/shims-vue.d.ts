@@ -4,3 +4,8 @@ declare module '*.vue' {
   const component: DefineComponent<{}, {}, any>
   export default component
 }
+
+declare module 'vuetify/lib/framework' {
+    import Vuetify from 'vuetify';
+    export default Vuetify;
+}

@@ -20,6 +20,8 @@ Then you can do
 ## TODOs
 
 - [ ] icons?
+- [ ] start miner exe from UI
+- [ ] capture and show miner output in UI
 - built application touchups
     - [ ] proper title and description
     - [ ] appId

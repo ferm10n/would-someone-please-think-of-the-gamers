@@ -1,4 +1,4 @@
-import { onUnmounted } from "@vue/runtime-core";
+import { onUnmounted } from "@vue/composition-api";
 import { IpcRendererEvent } from "electron";
 
 export function useIpcEventHandler<T>(
