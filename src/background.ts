@@ -1,14 +1,26 @@
 "use strict";
 
-import { app, protocol, BrowserWindow } from "electron";
+import { app, protocol, BrowserWindow, ipcMain } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
+import { spawnSync } from "child_process";
+import path from "path";
+
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: "app", privileges: { secure: true, standard: true } },
 ]);
+
+ipcMain.on("test-probe", (event) => {
+  const { output } = spawnSync("powershell.exe", ["-Command", "echo hi"], {
+    encoding: "utf8",
+  });
+  console.log(output);
+
+  event.sender.send("test-probe-reply", output);
+});
 
 async function createWindow() {
   // Create the browser window.
@@ -20,6 +32,7 @@ async function createWindow() {
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: (process.env
         .ELECTRON_NODE_INTEGRATION as unknown) as boolean,
+      preload: path.join(__dirname, "preload.js"),
     },
   });
 
