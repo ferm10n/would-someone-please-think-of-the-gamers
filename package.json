@@ -1,0 +1,14 @@
+{
+  "name": "@ferm10n/would-someone-please-think-of-the-gamers",
+  "version": "1.0.0",
+  "description": "Would someone PLEASE think of the gamers!?",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ferm10n/would-someone-please-think-of-the-gamers.git"
+  },
+  "homepage": "https://github.com/ferm10n/would-someone-please-think-of-the-gamers",
+  "author": "John Sanders <jws121295@gmail.com>",
+  "license": "MIT",
+  "private": true
+}
