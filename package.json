@@ -17,7 +17,14 @@
   "main": "background.js",
   "dependencies": {
     "core-js": "^3.6.5",
-    "vue": "^3.0.0"
+    "primeicons": "^4.1.0",
+    "primevue": "^3.3.5",
+    "sass": "^1.32.12",
+    "sass-loader": "^10",
+    "stylus": "^0.54.8",
+    "stylus-loader": "^5.0.0",
+    "vue": "^3.0.0",
+    "webpack": "^4"
   },
   "devDependencies": {
     "@types/electron-devtools-installer": "^2.2.0",

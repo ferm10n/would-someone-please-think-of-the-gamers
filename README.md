@@ -15,3 +15,13 @@ Initial setup, just install deps: `$ yarn`
 Then you can do
 - `$ yarn start` - dev mode
 - `$ yarn build` - build exe
+
+
+## TODOs
+
+- [ ] icons?
+- built application touchups
+    - [ ] proper title and description
+    - [ ] appId
+    - [ ] remove window top bar
+    - [ ] exe name

@@ -1,18 +1,19 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <button @click="testProbe()">Test Probe</button>
-  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" />
+  <div id="app">
+    <InputText type="text" placeholder="input" />
+    <button @click="testProbe()">Test Probe</button>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import HelloWorld from "./components/HelloWorld.vue";
 import { useIpcEventHandler } from "./util";
+import InputText from "primevue/inputtext";
 
 export default defineComponent({
   name: "App",
   components: {
-    HelloWorld,
+    InputText,
   },
   setup() {
     useIpcEventHandler<string[]>("test-probe-reply", (event, args) => {
@@ -29,12 +30,13 @@ export default defineComponent({
 </script>
 
 <style>
-#app {
+body {
+  background-color: var(--surface-b);
+  color: var(--text-color);
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
   margin-top: 60px;
 }
 </style>

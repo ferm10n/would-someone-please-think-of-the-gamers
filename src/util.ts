@@ -5,6 +5,8 @@ export function useIpcEventHandler<T>(
   eventName: string,
   cb: (event: IpcRendererEvent, args: T) => void
 ): void {
-  window.ipcRenderer.on(eventName, cb);
-  onUnmounted(() => window.ipcRenderer.off(eventName, cb));
+  if ("ipcRenderer" in window) {
+    window.ipcRenderer.on(eventName, cb);
+    onUnmounted(() => window.ipcRenderer.off(eventName, cb));
+  }
 }
