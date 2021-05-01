@@ -1,14 +1,46 @@
 {
   "name": "@ferm10n/would-someone-please-think-of-the-gamers",
   "version": "1.0.0",
+  "private": true,
   "description": "Would someone PLEASE think of the gamers!?",
+  "author": {
+    "name": "John Sanders",
+    "email": "jws121295@gmail.com"
+  },
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
   "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ferm10n/would-someone-please-think-of-the-gamers.git"
+  "dependencies": {
+    "core-js": "^3.6.5",
+    "vue": "^3.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.18.0",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-plugin-typescript": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-vue": "^7.0.0",
+    "prettier": "^2.2.1",
+    "typescript": "~4.1.5"
+  },
+  "_id": "@ferm10n/would-someone-please-think-of-the-gamers@1.0.0",
+  "bugs": {
+    "url": "https://github.com/ferm10n/would-someone-please-think-of-the-gamers/issues"
   },
   "homepage": "https://github.com/ferm10n/would-someone-please-think-of-the-gamers",
-  "author": "John Sanders <jws121295@gmail.com>",
   "license": "MIT",
-  "private": true
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ferm10n/would-someone-please-think-of-the-gamers.git"
+  }
 }
