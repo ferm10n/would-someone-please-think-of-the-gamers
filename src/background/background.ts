@@ -2,12 +2,28 @@
 
 import { app, protocol, BrowserWindow, ipcMain } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
-import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import { spawnSync } from 'child_process';
 import path from 'path';
-import './ipc';
+import './store';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
+
+// conditionally install devtools
+if (isDevelopment && !process.env.IS_TEST) {
+  const {
+    default: installExtension,
+    VUEJS_DEVTOOLS,
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+  } = require('electron-devtools-installer');
+  app.on('ready', async () => {
+    try {
+      await installExtension(VUEJS_DEVTOOLS);
+      console.log('Added vuejs devtools extension');
+    } catch (err) {
+      console.error('Failed to add vuejs devtools extension', err);
+    }
+  });
+}
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -67,14 +83,6 @@ app.on('activate', () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
-  if (isDevelopment && !process.env.IS_TEST) {
-    // Install Vue Devtools
-    try {
-      await installExtension(VUEJS_DEVTOOLS);
-    } catch (e) {
-      console.error('Vue Devtools failed to install:', e.toString());
-    }
-  }
   createWindow();
 });
 
