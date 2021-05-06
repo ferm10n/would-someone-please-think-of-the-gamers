@@ -61,5 +61,8 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ferm10n/would-someone-please-think-of-the-gamers.git"
+  },
+  "prettier": {
+    "singleQuote": true
   }
 }

@@ -23,25 +23,25 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "@vue/composition-api";
-import { useIpcEventHandler } from "./util";
-import type { OpenDialogReturnValue, OpenDialogOptions } from "electron";
+import { defineComponent, ref } from '@vue/composition-api';
+import { useIpcEventHandler } from './util';
+import type { OpenDialogReturnValue, OpenDialogOptions } from 'electron';
 
 export default defineComponent({
-  name: "App",
+  name: 'App',
   setup() {
-    useIpcEventHandler<string[]>("test-probe-reply", (event, args) => {
+    useIpcEventHandler<string[]>('test-probe-reply', (event, args) => {
       alert(JSON.stringify(args));
     });
 
-    const minerPath = ref<string>("");
-    const minerArgs = ref<string>("");
+    const minerPath = ref<string>('');
+    const minerArgs = ref<string>('');
     useIpcEventHandler<[string, OpenDialogReturnValue]>(
-      "pick-path-reply",
+      'pick-path-reply',
       (event, [type, val]) => {
         switch (type) {
-          case "miner":
-            minerPath.value = val.filePaths[0] || "";
+          case 'miner':
+            minerPath.value = val.filePaths[0] || '';
             break;
           default:
             return;
@@ -51,20 +51,20 @@ export default defineComponent({
 
     return {
       testProbe() {
-        window.ipcRenderer.send("test-probe");
+        window.ipcRenderer.send('test-probe');
       },
       minerPath,
       minerArgs,
       pickMinerPath() {
-        window.ipcRenderer.send("pick-path", [
-          "miner",
+        window.ipcRenderer.send('pick-path', [
+          'miner',
           {
-            title: "Set the file path to the miner executable",
-            properties: ["openFile"],
+            title: 'Set the file path to the miner executable',
+            properties: ['openFile'],
             filters: [
               {
-                name: "Executable",
-                extensions: ["exe"],
+                name: 'Executable',
+                extensions: ['exe'],
               },
             ],
           } as OpenDialogOptions,

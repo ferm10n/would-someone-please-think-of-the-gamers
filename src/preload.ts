@@ -1,4 +1,4 @@
-import { IpcRenderer, ipcRenderer } from "electron";
+import { IpcRenderer, ipcRenderer } from 'electron';
 
 declare global {
   interface Window {
