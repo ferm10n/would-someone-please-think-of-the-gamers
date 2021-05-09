@@ -3,6 +3,7 @@ module.exports = {
     electronBuilder: {
       mainProcessFile: 'src/background/background.ts',
       preload: 'src/preload.ts',
+      mainProcessWatch: ['src/background**/*.ts'],
     },
   },
 };
