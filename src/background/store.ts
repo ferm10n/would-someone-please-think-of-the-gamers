@@ -1,6 +1,7 @@
 import ElectronStore from 'electron-store';
-import { ipcMain, dialog, OpenDialogOptions } from 'electron';
-import { Store } from '../../types/store';
+import { dialog } from 'electron';
+import { Store } from '../../types';
+import { useIpcMainChannel } from './util';
 
 export const store = new ElectronStore<Store>({
   schema: {
@@ -20,27 +21,26 @@ export const store = new ElectronStore<Store>({
 });
 
 // when the ui requests, show a path picker
-ipcMain.on('pick-path', (event, [id, opts]: [string, OpenDialogOptions]) => {
-  console.log('pick-path');
+useIpcMainChannel('pick-path', (event, reply, pathId, opts) => {
   dialog.showOpenDialog(opts).then((val) => {
-    event.sender.send('pick-path-reply', [id, val]);
+    reply(pathId, val);
   });
 });
 
 // gets the entire store
-ipcMain.on('get-store', (event) => {
-  console.log('get-store');
-  event.sender.send('get-store-reply', store.store);
-});
+const { send: sendGetStoreReply } = useIpcMainChannel(
+  'get-store',
+  (event, reply) => reply(store.store)
+);
 
 // sets a key on the store
-ipcMain.on('store-set', (event, storePart: Partial<Store>) => {
-  console.log('store-set', storePart);
-  store.set(storePart);
+useIpcMainChannel('store-set', (event, reply, patchStore) => {
+  store.set(patchStore);
+  reply(patchStore);
+  sendGetStoreReply(event.sender, store.store);
 });
 
-ipcMain.on('store-reset', (event) => {
-  console.log('store-reset');
+useIpcMainChannel('store-reset', (event) => {
   store.clear();
-  event.sender.send('get-store-reply', store.store);
+  sendGetStoreReply(event.sender, store.store);
 });

@@ -1,68 +1,93 @@
-import { computed, onUnmounted, ref } from '@vue/composition-api';
-import { IpcRenderer, IpcRendererEvent } from 'electron';
-import { Store } from 'types/store';
-import Vue from 'vue';
+import {
+  computed,
+  onUnmounted,
+  ref,
+  getCurrentInstance,
+  WritableComputedRef,
+} from '@vue/composition-api';
+import { IpcRendererEvent } from 'electron';
+import { Store, MessageMap, ClientMessageMap } from '../types';
 
-export const ipcSend: IpcRenderer['send'] = (
-  ...args: Parameters<IpcRenderer['send']>
-) => {
-  console.log(...args);
-  window.ipcRenderer.send(...args);
-};
-
-export function useIpcEventHandler<T>(
-  eventName: string,
-  cb: (event: IpcRendererEvent, args: T) => void
-): void {
-  if ('ipcRenderer' in window) {
-    const wrapCb = (event: IpcRendererEvent, args: T) => {
-      console.log(eventName, args);
-      cb(event, args);
+/**
+ * allows a component to send and receive on an ipc channel.
+ * also performs cleanup.
+ */
+export function useIpcRendererChannel<CHAN extends keyof ClientMessageMap>(
+  channel: CHAN,
+  onReply?: (
+    event: IpcRendererEvent,
+    ...args: MessageMap[CHAN]['serverArgs']
+  ) => void
+): { send: (...args: MessageMap[CHAN]['clientArgs']) => void } {
+  if (onReply) {
+    /** wrapped handler that logs things */
+    const wrapCb = (
+      event: IpcRendererEvent,
+      ...args: MessageMap[CHAN]['serverArgs']
+    ) => {
+      console.log('⬇', channel, ...args);
+      onReply(event, ...args);
     };
-    window.ipcRenderer.on(eventName, wrapCb);
-    onUnmounted(() => window.ipcRenderer.off(eventName, wrapCb));
+
+    // add the binding
+    window.ipcRenderer.on(
+      channel,
+      // not sure how to relax tsc with the any[] to tuple type from MessageMap
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      wrapCb as (event: IpcRendererEvent, ...args: any[]) => void
+    );
+
+    // if used in a component, do cleanup
+    if (getCurrentInstance()) {
+      onUnmounted(() =>
+        window.ipcRenderer.off(
+          channel,
+          // not sure how to relax tsc with the any[] to tuple type from MessageMap
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          wrapCb as (event: IpcRendererEvent, ...args: any[]) => void
+        )
+      );
+    }
   }
+
+  // provide a way to send on the channel
+  return {
+    send: (...args) => {
+      console.log('⬆', channel, ...args);
+      window.ipcRenderer.send(channel, ...args);
+    },
+  };
 }
 
 const store = ref<Store | null>(null);
-function storeAccessor<T extends keyof Store>(key: T) {
+
+const { send: storeSet } = useIpcRendererChannel(
+  'store-set',
+  (event, patchedStore) => {
+    if (store.value) {
+      Object.assign(store.value, patchedStore);
+    }
+  }
+);
+
+/** allows getting and setting a prop in the remote store */
+export function useRemoteStoreProp<T extends keyof Store>(
+  key: T
+): WritableComputedRef<Store[T] | null> {
   return computed({
     get: () => {
       return (store.value && store.value[key]) || null;
     },
     set: (val) => {
-      ipcSend('store-set', { [key]: val });
-      const storeVal = store.value;
-      if (storeVal) {
-        Vue.set(storeVal, key, val);
-      }
+      storeSet({ [key]: val });
+      // TODO after set in bg, should send get-store
     },
   });
 }
 
-function refreshStore() {
-  ipcSend('get-store');
-}
-
-/** switched on the first call to `useStore */
-let storeSyncing = false;
-
-export function useStore(): {
-  store: typeof store;
-  storeAccessor: typeof storeAccessor;
-  refreshStore: typeof refreshStore;
-} {
-  if (!storeSyncing) {
-    useIpcEventHandler<Store>('get-store-reply', (event, mainStore) => {
-      store.value = mainStore;
-    });
-    refreshStore();
-    storeSyncing = true;
+export const { send: refreshStore } = useIpcRendererChannel(
+  'get-store',
+  (event, mainStore) => {
+    store.value = mainStore;
   }
-
-  return {
-    store,
-    storeAccessor,
-    refreshStore,
-  };
-}
+);

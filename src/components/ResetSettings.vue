@@ -21,17 +21,18 @@
 </template>
 
 <script lang="ts">
-import { ipcSend } from '@/util';
+import { useIpcRendererChannel } from '@/util';
 import { defineComponent, ref } from '@vue/composition-api';
 
 export const ResetSettings = defineComponent({
   name: 'ResetSettings',
   setup() {
     const resetDialog = ref(false);
+    const { send: sendStoreReset } = useIpcRendererChannel('store-reset');
     return {
       resetDialog,
       resetStore: () => {
-        ipcSend('store-reset');
+        sendStoreReset();
         resetDialog.value = false;
       },
     };

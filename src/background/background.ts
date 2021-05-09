@@ -30,15 +30,6 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ]);
 
-ipcMain.on('test-probe', (event) => {
-  const { output } = spawnSync('powershell.exe', ['-Command', 'echo hi'], {
-    encoding: 'utf8',
-  });
-  console.log(output);
-
-  event.sender.send('test-probe-reply', output);
-});
-
 async function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({

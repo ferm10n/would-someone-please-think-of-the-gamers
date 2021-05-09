@@ -19,10 +19,16 @@ Then you can do
 
 ## TODOs
 
-- [ ] icons?
+- configs (UI / Implementation)
+    - ([x] / [ ]) miner path
+    - ([x] / [ ]) miner args
+    - ([ ] / [ ]) start and stop control
+- [ ] visualize whether the miner was started by the manager
+- [ ] detect if the miner is running
 - [ ] start miner exe from UI
 - [ ] capture and show miner output in UI
 - built application touchups
+    - [ ] exe icons
     - [ ] proper title and description
     - [ ] appId
     - [ ] remove window top bar
