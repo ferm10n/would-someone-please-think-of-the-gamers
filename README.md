@@ -20,12 +20,12 @@ Then you can do
 ## TODOs
 
 - configs (UI / Implementation)
-    - ([x] / [ ]) miner path
+    - ([x] / [x]) miner path
     - ([x] / [ ]) miner args
-    - ([ ] / [ ]) start and stop control
+    - ([x] / [x]) start and stop control
 - [ ] visualize whether the miner was started by the manager
 - [x] detect if the miner is running
-- [ ] start miner exe from UI
+- [x] start miner exe from UI
 - [ ] capture and show miner output in UI
 - built application touchups
     - [ ] exe icons
@@ -35,3 +35,6 @@ Then you can do
     - [ ] exe name
 - [ ] log to file arg flag
 - [ ] suicide on window close
+- [ ] toggle advanced options
+- [ ] add tested miners in README section
+- [ ] kill miner process on exit?

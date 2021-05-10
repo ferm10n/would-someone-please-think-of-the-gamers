@@ -1,12 +1,12 @@
 import { useIpcMainChannel, sendError, windowAccessor } from './util';
 import { store } from './store';
-import { execSync } from 'child_process';
+import { execSync, exec, ChildProcess } from 'child_process';
 import parseCsv from 'csv-parse/lib/sync';
 import { MinerStatus } from '../../types';
 
 // TODO maybe check if multiple instances are detected, to prevent someone killing a proc they shouldn't. would only need to handle this in the kill handler
 
-const minerPid: string | null = null;
+let minerChild: ChildProcess | null = null;
 
 // the miner status should not be sent if there is no minerPath. this should preserve the "unknown" state in the renderer.
 
@@ -35,13 +35,15 @@ function getMinerStatus(minerPath: string): MinerStatus {
     // send result
     if (result.length > 0) {
       return {
-        external: minerPid === null,
+        external: minerChild === null,
         status: 'running',
+        pids: result.map((r) => r.ProcessId),
       };
     } else {
       return {
         external: false,
         status: 'stopped',
+        pids: [],
       };
     }
   } catch (err) {
@@ -49,6 +51,7 @@ function getMinerStatus(minerPath: string): MinerStatus {
     return {
       external: false,
       status: 'unknown',
+      pids: [],
     };
   }
 }
@@ -73,6 +76,36 @@ store.onDidChange('minerPath', () => {
     sendMinerStatus(win.webContents, {
       status: 'unknown',
       external: false,
+      pids: [],
     });
+  }
+});
+
+// TODO on every check, should set the minerChild to null if it's external
+
+useIpcMainChannel('toggle-miner', (event, reply, desired) => {
+  const minerPath = store.get('minerPath');
+
+  // abort if miner cannot be controlled yet
+  if (!minerPath) {
+    return;
+  }
+
+  const minerStatus = getMinerStatus(minerPath);
+
+  if (desired && minerStatus.status === 'stopped') {
+    // start the miner
+    minerChild = exec(minerPath);
+    reply(true);
+  } else if (!desired && minerStatus.status === 'running') {
+    // kill the miner
+    for (const pid of minerStatus.pids) {
+      process.kill(Number(pid), 'SIGTERM');
+      reply(true);
+    }
+  } else {
+    // the renderer must be out of sync
+    sendMinerStatus(event.sender, minerStatus);
+    reply(false);
   }
 });

@@ -32,6 +32,10 @@ export type MessageMap = {
     never,
     (error: { message: string; [extra: string]: any }) => void
   >;
+  'toggle-miner': MessageMapItem<
+    (desired: boolean) => void,
+    (accepted: boolean) => void
+  >;
 };
 
 export type ClientMessageMap = {

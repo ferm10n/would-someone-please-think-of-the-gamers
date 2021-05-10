@@ -15,9 +15,24 @@ export const MinerController = defineComponent({
     const canGetMinerStatus = computed(
       () => minerPath.value && !gettingMinerStatus.value
     );
-    const busy = computed(
-      () => gettingMinerStatus.value || changingMinerStatus.value
+
+    /**
+     * we can change the miner status if:
+     * - miner path is set
+     * - we're not already changing the miner status
+     * - we're currently getting the miner status (and toggle behavior would be undefined)
+     * - we know the miner status (from the main), even if its "unknown"
+     */
+    const canChangeMinerStatus = computed(
+      () =>
+        minerPath.value &&
+        !changingMinerStatus.value &&
+        !gettingMinerStatus.value &&
+        minerStatus.value &&
+        minerStatus.value.status !== 'unknown'
     );
+
+    const busy = computed(() => gettingMinerStatus.value);
 
     const { send: sendGetMinerStatus } = useIpcRendererChannel(
       'get-miner-status',
@@ -77,6 +92,26 @@ export const MinerController = defineComponent({
       }
     });
 
+    const { send: sendToggleMiner } = useIpcRendererChannel(
+      'toggle-miner',
+      () => {
+        changingMinerStatus.value = false;
+        getMinerStatus();
+
+        // TODO on start, clear log panel
+      }
+    );
+    function toggleMiner() {
+      if (canChangeMinerStatus.value && minerStatus.value) {
+        /** true if not running */
+        const desired = minerStatus.value.status !== 'running';
+        changingMinerStatus.value = true;
+        sendToggleMiner(desired);
+      }
+    }
+
+    // TODO canToggleMiner
+
     return {
       gettingMinerStatus,
       minerStatus,
@@ -85,6 +120,7 @@ export const MinerController = defineComponent({
       changingMinerStatus,
       getMinerStatus,
       canGetMinerStatus,
+      toggleMiner,
     };
   },
 });
@@ -109,10 +145,17 @@ export default MinerController;
           </v-btn>
         </template>
       </v-alert>
-      <v-switch inset color="green" :value="statusAttrs.switchState">
+      <v-switch
+        inset
+        color="green"
+        :value="statusAttrs.switchState"
+        @click="toggleMiner"
+        readonly
+      >
         <template #label>
           Click to {{ statusAttrs.switchState ? 'stop' : 'start' }} miner
           <v-progress-circular
+            v-if="changingMinerStatus"
             indeterminate
             :value="0"
             size="24"
@@ -120,28 +163,36 @@ export default MinerController;
           />
         </template>
       </v-switch>
-      <v-expansion-panels accordion>
-        <v-expansion-panel>
-          <v-expansion-panel-header>Miner logs</v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <pre>
-  *** 18:48 *** 5/4 21:09 **************************************
-  Eth: Mining ETH on eu1.ethermine.org:4444 for 18:48
-  Eth: Accepted shares 1 (1 stales), rejected shares 0 (0 stales)
-  Eth: Incorrect shares 0 (0.00%), est. stales percentage 0.06%
-  Eth: Maximum difficulty of found share: 5426.5 GH (!)
-  Eth: Average speed (5 min): 97.049 MH/s
-  Eth: Effective speed: 99.09 MH/s; at pool: 99.09 MH/s
+      <v-expand-transition appear>
+        <v-expansion-panels
+          v-if="
+            minerStatus &&
+            minerStatus.status === 'running' &&
+            minerStatus.external === false
+          "
+          accordion
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header>Miner logs</v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <pre>
+*** 18:48 *** 5/4 21:09 **************************************
+Eth: Mining ETH on eu1.ethermine.org:4444 for 18:48
+Eth: Accepted shares 1 (1 stales), rejected shares 0 (0 stales)
+Eth: Incorrect shares 0 (0.00%), est. stales percentage 0.06%
+Eth: Maximum difficulty of found share: 5426.5 GH (!)
+Eth: Average speed (5 min): 97.049 MH/s
+Eth: Effective speed: 99.09 MH/s; at pool: 99.09 MH/s
 
-  Eth: New job #d4cacbcd from eu1.ethermine.org:4444; diff: 4295MH
-  Eth speed: 99.209 MH/s, shares: 1562/0/0, time: 18:48
-  GPU1: 57C 97% 272W
-  GPUs power: 272.0 W
-                </pre
-            >
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-      </v-expansion-panels>
+Eth: New job #d4cacbcd from eu1.ethermine.org:4444; diff: 4295MH
+Eth speed: 99.209 MH/s, shares: 1562/0/0, time: 18:48
+GPU1: 57C 97% 272W
+GPUs power: 272.0 W
+              </pre>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </v-expand-transition>
     </div>
   </v-card>
 </template>
