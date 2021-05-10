@@ -76,7 +76,7 @@ export function useRemoteStoreProp<T extends keyof Store>(
 ): WritableComputedRef<Store[T] | null> {
   return computed({
     get: () => {
-      return (store.value && store.value[key]) || null;
+      return store.value ? store.value[key] : null;
     },
     set: (val) => {
       storeSet({ [key]: val });
