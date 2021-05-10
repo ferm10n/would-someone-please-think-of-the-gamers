@@ -44,27 +44,35 @@ export const MinerController = defineComponent({
       getMinerStatus();
     }
 
-    const statusAttrs = computed<{ type: string; text: string }>(() => {
+    const statusAttrs = computed<{
+      type: string;
+      text: string;
+      switchState: boolean;
+    }>(() => {
       const minerStatusVal = minerStatus.value;
       if (minerStatusVal) {
         return {
           running: {
             type: 'success',
             text: 'RUNNING',
+            switchState: true,
           },
           stopped: {
             type: 'error',
             text: 'STOPPED',
+            switchState: false,
           },
-          error: {
+          unknown: {
             type: 'warning',
-            text: 'UNPOSSIBLE',
+            text: 'UNKNOWN',
+            switchState: false,
           },
         }[minerStatusVal.status];
       } else {
         return {
           type: 'warning',
           text: 'UNKNOWN',
+          switchState: false,
         };
       }
     });
@@ -76,6 +84,7 @@ export const MinerController = defineComponent({
       busy,
       changingMinerStatus,
       getMinerStatus,
+      canGetMinerStatus,
     };
   },
 });
@@ -93,16 +102,16 @@ export default MinerController;
             icon
             :color="statusAttrs.type"
             small
-            :disabled="gettingMinerStatus"
+            :disabled="!canGetMinerStatus"
             @click="getMinerStatus()"
           >
             <v-icon>mdi-refresh</v-icon>
           </v-btn>
         </template>
       </v-alert>
-      <v-switch inset color="green">
+      <v-switch inset color="green" :value="statusAttrs.switchState">
         <template #label>
-          Click to start miner
+          Click to {{ statusAttrs.switchState ? 'stop' : 'start' }} miner
           <v-progress-circular
             indeterminate
             :value="0"
