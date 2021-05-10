@@ -19,6 +19,7 @@
     "@mdi/font": "^5.9.55",
     "@vue/composition-api": "^1.0.0-rc.8",
     "core-js": "^3.6.5",
+    "csv-parse": "^4.15.4",
     "electron-store": "^8.0.0",
     "primeicons": "^4.1.0",
     "primevue": "^3.3.5",

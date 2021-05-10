@@ -1,12 +1,15 @@
 'use strict';
 
-import { app, protocol, BrowserWindow, ipcMain } from 'electron';
+import { app, protocol, BrowserWindow } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
-import { spawnSync } from 'child_process';
 import path from 'path';
 import './store';
+import './miner';
+import winAccessor from './util';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
+
+// TODO uncaught handler
 
 // conditionally install devtools
 if (isDevelopment && !process.env.IS_TEST) {
@@ -43,6 +46,9 @@ async function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
     },
   });
+
+  // store the main window so emitters know the target
+  winAccessor.set(win);
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode

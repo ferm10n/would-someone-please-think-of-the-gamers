@@ -28,6 +28,10 @@ export type MessageMap = {
     (pathId: string, opts: OpenDialogOptions) => void,
     (pathId: string, result: OpenDialogReturnValue) => void
   >;
+  'server-error': MessageMapItem<
+    never,
+    (error: { message: string; [extra: string]: any }) => void
+  >;
 };
 
 export type ClientMessageMap = {

@@ -6,7 +6,7 @@ export type Store = {
 };
 
 export type MinerStatus = {
-  status: 'running' | 'stopped';
+  status: 'running' | 'stopped' | 'error';
   /** whether or not the miner was started by the controller, or by the user */
   external: boolean;
 };

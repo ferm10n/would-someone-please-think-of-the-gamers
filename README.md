@@ -24,7 +24,7 @@ Then you can do
     - ([x] / [ ]) miner args
     - ([ ] / [ ]) start and stop control
 - [ ] visualize whether the miner was started by the manager
-- [ ] detect if the miner is running
+- [x] detect if the miner is running
 - [ ] start miner exe from UI
 - [ ] capture and show miner output in UI
 - built application touchups
@@ -33,3 +33,5 @@ Then you can do
     - [ ] appId
     - [ ] remove window top bar
     - [ ] exe name
+- [ ] log to file arg flag
+- [ ] suicide on window close

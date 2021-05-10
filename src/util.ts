@@ -6,13 +6,13 @@ import {
   WritableComputedRef,
 } from '@vue/composition-api';
 import { IpcRendererEvent } from 'electron';
-import { Store, MessageMap, ClientMessageMap } from '../types';
+import { Store, MessageMap } from '../types';
 
 /**
  * allows a component to send and receive on an ipc channel.
  * also performs cleanup.
  */
-export function useIpcRendererChannel<CHAN extends keyof ClientMessageMap>(
+export function useIpcRendererChannel<CHAN extends keyof MessageMap>(
   channel: CHAN,
   onReply?: (
     event: IpcRendererEvent,
@@ -25,7 +25,7 @@ export function useIpcRendererChannel<CHAN extends keyof ClientMessageMap>(
       event: IpcRendererEvent,
       ...args: MessageMap[CHAN]['serverArgs']
     ) => {
-      console.log('⬇', channel, ...args);
+      console.log('▼', channel, ...args);
       onReply(event, ...args);
     };
 
@@ -53,7 +53,7 @@ export function useIpcRendererChannel<CHAN extends keyof ClientMessageMap>(
   // provide a way to send on the channel
   return {
     send: (...args) => {
-      console.log('⬆', channel, ...args);
+      console.log('▲', channel, ...args);
       window.ipcRenderer.send(channel, ...args);
     },
   };

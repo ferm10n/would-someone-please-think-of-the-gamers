@@ -65,9 +65,13 @@ export default defineComponent({
       }
     );
 
+    useIpcRendererChannel('server-error', (event, error) => {
+      // TODO handle
+    });
+
     return {
       refreshStore,
-      storeReady: computed(() => minerPath !== null),
+      storeReady: computed(() => minerPath.value !== null),
       minerPath,
       minerArgs,
       pickMinerPath() {
