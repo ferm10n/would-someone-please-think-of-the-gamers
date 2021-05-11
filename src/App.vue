@@ -28,11 +28,18 @@
       <v-divider class="my-4" />
       <ResetSettings />
     </v-main>
+    <v-footer padless>
+      <v-col class="text-center" cols="12">
+        <a @click="openGithub">GitHub</a>
+        -
+        {{ version }} {{ channel ? `(${channel})` : '' }}
+      </v-col>
+    </v-footer>
   </v-app>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from '@vue/composition-api';
+import { defineComponent, computed, ref } from '@vue/composition-api';
 import {
   useRemoteStoreProp,
   refreshStore,
@@ -65,15 +72,33 @@ export default defineComponent({
       }
     );
 
+    const version = ref('');
+    const channel = ref('');
+    const { send: sendGetVersion } = useIpcRendererChannel(
+      'get-version',
+      (event, versionReply, channelReply) => {
+        version.value = versionReply;
+        channel.value = channelReply;
+      }
+    );
+    sendGetVersion();
+
     useIpcRendererChannel('server-error', (event, error) => {
       // TODO handle
     });
+
+    const { send: sendOpenGithub } = useIpcRendererChannel('open-github');
 
     return {
       refreshStore,
       storeReady: computed(() => minerPath.value !== null),
       minerPath,
       minerArgs,
+      version,
+      channel,
+      openGithub() {
+        sendOpenGithub();
+      },
       pickMinerPath() {
         sendPickPath('minerPath', {
           title: 'Set the file path to the miner executable',

@@ -3,11 +3,25 @@
 import { app, protocol, BrowserWindow } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import path from 'path';
-import './store';
+import { store } from './store';
 import './miner';
-import winAccessor from './util';
+import winAccessor, { useIpcMainChannel } from './util';
+import { autoUpdater } from 'electron-updater';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
+
+// using prerelease from github seems to work
+// 0.0.1 --> 0.0.2
+// 0.0.2 -/-> 0.0.3-alpha
+// 0.0.3-alpha --> 0.0.3-alpha.2
+// 0.0.3-alpha.2 -/-> 0.0.3-alpha
+
+console.log(`version: ${JSON.stringify(autoUpdater.currentVersion)}`);
+autoUpdater.channel = store.get('channel');
+console.log(`channel: ${autoUpdater.channel}`);
+useIpcMainChannel('get-version', (event, reply) => {
+  reply(autoUpdater.currentVersion.version, autoUpdater.channel || '');
+});
 
 // TODO uncaught handler
 
@@ -37,7 +51,7 @@ async function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
     width: 800,
-    height: 600,
+    height: 800,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
@@ -58,11 +72,13 @@ async function createWindow() {
     createProtocol('app');
     // Load the index.html when not in development
     win.loadURL('app://./index.html');
+    autoUpdater.checkForUpdatesAndNotify();
   }
 }
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
+  console.log('all closed');
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {

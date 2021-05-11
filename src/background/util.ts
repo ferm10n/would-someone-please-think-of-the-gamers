@@ -1,6 +1,7 @@
 import { MessageMap } from 'types';
-import { BrowserWindow, ipcMain } from 'electron';
+import { BrowserWindow, ipcMain, shell } from 'electron';
 import { IpcMainEvent } from 'electron/main';
+import pkg from '../../package.json';
 
 let win: BrowserWindow | null = null;
 export const windowAccessor = {
@@ -74,3 +75,7 @@ export function sendError(errorLike: Parameters<typeof sendErrorRaw>[1]): void {
     sendErrorRaw(winAccVal.webContents, errorLike);
   }
 }
+
+useIpcMainChannel('open-github', () => {
+  shell.openExternal(pkg.homepage);
+});

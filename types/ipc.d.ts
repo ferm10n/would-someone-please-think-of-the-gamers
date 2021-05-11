@@ -36,6 +36,11 @@ export type MessageMap = {
     (desired: boolean) => void,
     (accepted: boolean) => void
   >;
+  'get-version': MessageMapItem<
+    () => void,
+    (version: string, channel: string) => void
+  >;
+  'open-github': MessageMapItem<() => void, () => void>;
 };
 
 export type ClientMessageMap = {

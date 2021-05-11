@@ -2,9 +2,14 @@ import ElectronStore from 'electron-store';
 import { dialog } from 'electron';
 import { Store } from '../../types';
 import { useIpcMainChannel } from './util';
+import { autoUpdater } from 'electron-updater';
 
 export const store = new ElectronStore<Store>({
   schema: {
+    channel: {
+      type: 'string',
+      default: '',
+    },
     minerPath: {
       type: 'string',
       default: '',
@@ -19,6 +24,14 @@ export const store = new ElectronStore<Store>({
     },
   },
 });
+
+if (store.get('channel') === '') {
+  console.log('channel is not set, defaulting it...');
+  store.set(
+    'channel',
+    String(autoUpdater.currentVersion.prerelease[0] || 'latest')
+  );
+}
 
 // when the ui requests, show a path picker
 useIpcMainChannel('pick-path', (event, reply, pathId, opts) => {

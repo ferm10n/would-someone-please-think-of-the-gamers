@@ -1,6 +1,7 @@
 export * from './ipc';
 
 export type Store = {
+  channel: string;
   minerPath: string;
   minerArgs: string[];
 };
