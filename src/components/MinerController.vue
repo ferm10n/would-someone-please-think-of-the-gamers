@@ -163,7 +163,7 @@ export default MinerController;
           />
         </template>
       </v-switch>
-      <v-expand-transition appear>
+      <!-- <v-expand-transition appear>
         <v-expansion-panels
           v-if="
             minerStatus &&
@@ -192,7 +192,7 @@ GPUs power: 272.0 W
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
-      </v-expand-transition>
+      </v-expand-transition> -->
     </div>
   </v-card>
 </template>

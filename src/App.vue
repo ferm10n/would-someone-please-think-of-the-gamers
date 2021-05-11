@@ -15,14 +15,16 @@
         prepend-icon="mdi-pickaxe"
         append-icon="mdi-folder-open"
         :rules="[required]"
-        @click:append="pickMinerPath"
+        @click:append="pickPath('minerPath')"
       />
       <v-text-field
-        label="Miner CLI args (optional)"
-        :value="minerArgs"
-        @change="minerArgs = ($event || '').split(' ')"
+        label="Start Command (optional)"
+        :value="startCmd"
+        @change="startCmd = $event"
         filled
         prepend-icon="mdi-console-line"
+        append-icon="mdi-folder-open"
+        @click:append="pickPath('startCmd')"
       />
       <MinerController />
       <v-divider class="my-4" />
@@ -56,7 +58,7 @@ export default defineComponent({
   },
   setup() {
     const minerPath = useRemoteStoreProp('minerPath');
-    const minerArgs = useRemoteStoreProp('minerArgs');
+    const startCmd = useRemoteStoreProp('startCmd');
     refreshStore();
 
     const { send: sendPickPath } = useIpcRendererChannel(
@@ -65,6 +67,9 @@ export default defineComponent({
         switch (pathId) {
           case 'minerPath':
             minerPath.value = result.filePaths[0] || '';
+            break;
+          case 'startCmd':
+            startCmd.value = result.filePaths[0] || '';
             break;
           default:
             return;
@@ -93,20 +98,20 @@ export default defineComponent({
       refreshStore,
       storeReady: computed(() => minerPath.value !== null),
       minerPath,
-      minerArgs,
+      startCmd,
       version,
       channel,
       openGithub() {
         sendOpenGithub();
       },
-      pickMinerPath() {
-        sendPickPath('minerPath', {
+      pickPath(pathId: string) {
+        sendPickPath(pathId, {
           title: 'Set the file path to the miner executable',
           properties: ['openFile'],
           filters: [
             {
               name: 'Executable',
-              extensions: ['exe'],
+              extensions: ['exe', 'bat'],
             },
           ],
         });

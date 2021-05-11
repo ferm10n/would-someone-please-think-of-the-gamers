@@ -14,13 +14,9 @@ export const store = new ElectronStore<Store>({
       type: 'string',
       default: '',
     },
-    minerArgs: {
-      type: 'array',
-      items: {
-        type: 'string',
-        minLength: 1,
-      },
-      default: [],
+    startCmd: {
+      type: 'string',
+      default: '',
     },
   },
 });

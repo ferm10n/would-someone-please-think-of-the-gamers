@@ -3,7 +3,7 @@ export * from './ipc';
 export type Store = {
   channel: string;
   minerPath: string;
-  minerArgs: string[];
+  startCmd: string;
 };
 
 export type MinerStatus = {

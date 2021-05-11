@@ -35,7 +35,7 @@ Then you can do
 
 - configs (UI / Implementation)
     - ([x] / [x]) miner path
-    - ([x] / [ ]) miner args
+    - ([x] / [x]) custom start command
     - ([x] / [x]) start and stop control
 - [ ] visualize whether the miner was started by the manager
 - [x] detect if the miner is running

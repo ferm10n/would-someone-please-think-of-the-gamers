@@ -95,7 +95,7 @@ useIpcMainChannel('toggle-miner', (event, reply, desired) => {
 
   if (desired && minerStatus.status === 'stopped') {
     // start the miner
-    minerChild = exec(minerPath);
+    minerChild = exec(store.get('startCmd') || minerPath);
     reply(true);
   } else if (!desired && minerStatus.status === 'running') {
     // kill the miner
