@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0-alpha.1](https://github.com/ferm10n/would-someone-please-think-of-the-gamers/compare/v1.0.0-alpha.0...v1.0.0-alpha.1) (2021-05-11)
+
+
+### Features
+
+* pipe miner stdio to process stdio ([7b7f08e](https://github.com/ferm10n/would-someone-please-think-of-the-gamers/commit/7b7f08ea4de95db95da78b1a51b3292d13e80618))
+
 ## 1.0.0-alpha.0 (2021-05-11)
 
 
