@@ -16,7 +16,7 @@ export type MessageMap = {
     () => void,
     (minerStatus: MinerStatus) => void
   >;
-  'miner-log': MessageMapItem<never, (logItems: string[]) => void>;
+  'miner-log': MessageMapItem<never, (logLine: string) => void>;
   'store-set': MessageMapItem<
     (patchStore: Partial<Store>) => void,
     (patchStoreAck: Partial<Store>) => void
