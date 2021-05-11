@@ -95,7 +95,19 @@ useIpcMainChannel('toggle-miner', (event, reply, desired) => {
 
   if (desired && minerStatus.status === 'stopped') {
     // start the miner
-    minerChild = exec(store.get('startCmd') || minerPath);
+    const startCmd = store.get('startCmd') || minerPath;
+    minerChild = exec(
+      startCmd
+        .split(' ')
+        .map((x) => `"${x}"`)
+        .join(' ')
+    );
+    if (minerChild.stdout) {
+      minerChild.stdout.pipe(process.stdout);
+    }
+    if (minerChild.stderr) {
+      minerChild.stderr.pipe(process.stderr);
+    }
     reply(true);
   } else if (!desired && minerStatus.status === 'running') {
     // kill the miner
