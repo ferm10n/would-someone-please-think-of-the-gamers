@@ -92,13 +92,22 @@ export const MinerController = defineComponent({
       }
     });
 
+    const minerLogs = ref<string[]>([]);
+    const maxLines = 15;
+    useIpcRendererChannel('miner-log', (event, logLine) => {
+      minerLogs.value.push(logLine);
+      while (minerLogs.value.length > maxLines) {
+        minerLogs.value.shift();
+      }
+    });
+
     const { send: sendToggleMiner } = useIpcRendererChannel(
       'toggle-miner',
       () => {
         changingMinerStatus.value = false;
         getMinerStatus();
 
-        // TODO on start, clear log panel
+        minerLogs.value = [];
       }
     );
     function toggleMiner() {
@@ -110,8 +119,6 @@ export const MinerController = defineComponent({
       }
     }
 
-    // TODO canToggleMiner
-
     return {
       gettingMinerStatus,
       minerStatus,
@@ -121,6 +128,7 @@ export const MinerController = defineComponent({
       getMinerStatus,
       canGetMinerStatus,
       toggleMiner,
+      minerLogs,
     };
   },
 });
@@ -163,36 +171,18 @@ export default MinerController;
           />
         </template>
       </v-switch>
-      <!-- <v-expand-transition appear>
-        <v-expansion-panels
-          v-if="
-            minerStatus &&
-            minerStatus.status === 'running' &&
-            minerStatus.external === false
-          "
-          accordion
-        >
+      <v-expand-transition appear>
+        <v-expansion-panels v-show="minerLogs.length > 0" accordion>
           <v-expansion-panel>
             <v-expansion-panel-header>Miner logs</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <pre>
-*** 18:48 *** 5/4 21:09 **************************************
-Eth: Mining ETH on eu1.ethermine.org:4444 for 18:48
-Eth: Accepted shares 1 (1 stales), rejected shares 0 (0 stales)
-Eth: Incorrect shares 0 (0.00%), est. stales percentage 0.06%
-Eth: Maximum difficulty of found share: 5426.5 GH (!)
-Eth: Average speed (5 min): 97.049 MH/s
-Eth: Effective speed: 99.09 MH/s; at pool: 99.09 MH/s
-
-Eth: New job #d4cacbcd from eu1.ethermine.org:4444; diff: 4295MH
-Eth speed: 99.209 MH/s, shares: 1562/0/0, time: 18:48
-GPU1: 57C 97% 272W
-GPUs power: 272.0 W
-              </pre>
+              <pre class="pa-2 rounded" style="background-color: #091017">{{
+                minerLogs.join('\n')
+              }}</pre>
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
-      </v-expand-transition> -->
+      </v-expand-transition>
     </div>
   </v-card>
 </template>

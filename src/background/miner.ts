@@ -3,6 +3,7 @@ import { store } from './store';
 import { execSync, exec, ChildProcess } from 'child_process';
 import parseCsv from 'csv-parse/lib/sync';
 import { MinerStatus } from '../../types';
+import readline from 'readline';
 
 // TODO maybe check if multiple instances are detected, to prevent someone killing a proc they shouldn't. would only need to handle this in the kill handler
 
@@ -83,6 +84,8 @@ store.onDidChange('minerPath', () => {
 
 // TODO on every check, should set the minerChild to null if it's external
 
+const { send: sendMinerLog } = useIpcMainChannel('miner-log');
+
 useIpcMainChannel('toggle-miner', (event, reply, desired) => {
   const minerPath = store.get('minerPath');
 
@@ -96,17 +99,28 @@ useIpcMainChannel('toggle-miner', (event, reply, desired) => {
   if (desired && minerStatus.status === 'stopped') {
     // start the miner
     minerChild = exec(store.get('startCmd') || minerPath);
+    const win = windowAccessor.get();
     if (minerChild.stdout) {
       minerChild.stdout.pipe(process.stdout);
+      if (win) {
+        readline
+          .createInterface(minerChild.stdout)
+          .on('line', (l) => sendMinerLog(win.webContents, l));
+      }
     }
     if (minerChild.stderr) {
       minerChild.stderr.pipe(process.stderr);
+      if (win) {
+        readline
+          .createInterface(minerChild.stderr)
+          .on('line', (l) => sendMinerLog(win.webContents, l));
+      }
     }
     reply(true);
   } else if (!desired && minerStatus.status === 'running') {
     // kill the miner
     for (const pid of minerStatus.pids) {
-      process.kill(Number(pid), 'SIGTERM');
+      process.kill(Number(pid), 'SIGINT');
       reply(true);
     }
   } else {

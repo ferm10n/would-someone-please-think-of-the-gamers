@@ -14,6 +14,7 @@ import { Store, MessageMap } from '../types';
  */
 export function useIpcRendererChannel<CHAN extends keyof MessageMap>(
   channel: CHAN,
+  // TODO not all messages are replies here
   onReply?: (
     event: IpcRendererEvent,
     ...args: MessageMap[CHAN]['serverArgs']
