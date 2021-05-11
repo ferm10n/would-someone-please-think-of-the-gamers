@@ -66,10 +66,14 @@ export default defineComponent({
       (event, pathId, result) => {
         switch (pathId) {
           case 'minerPath':
-            minerPath.value = result.filePaths[0] || '';
+            minerPath.value = result.filePaths[0]
+              ? `"${result.filePaths[0]}"`
+              : '';
             break;
           case 'startCmd':
-            startCmd.value = result.filePaths[0] || '';
+            startCmd.value = result.filePaths[0]
+              ? `"${result.filePaths[0]}"`
+              : '';
             break;
           default:
             return;
