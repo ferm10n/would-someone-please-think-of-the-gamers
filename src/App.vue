@@ -7,12 +7,14 @@ import {
 } from './util';
 import { ResetSettings } from './components/ResetSettings.vue';
 import { MinerController } from './components/MinerController.vue';
+import { ProfileConfig } from './components/ProfileConfig.vue';
 
 export default defineComponent({
   name: 'App',
   components: {
     ResetSettings,
     MinerController,
+    ProfileConfig,
   },
   setup() {
     const minerPath = useRemoteStoreProp('minerPath');
@@ -78,8 +80,6 @@ export default defineComponent({
           ],
         });
       },
-      required: (val: string | null) =>
-        val && val.length > 0 ? true : 'Required',
     };
   },
 });
@@ -94,25 +94,7 @@ export default defineComponent({
           <v-icon> mdi-refresh </v-icon>
         </v-btn>
       </p>
-      <v-text-field
-        :value="minerPath"
-        @change="minerPath = $event"
-        label="Path to miner executable"
-        filled
-        prepend-icon="mdi-pickaxe"
-        append-icon="mdi-folder-open"
-        :rules="[required]"
-        @click:append="pickPath('minerPath')"
-      />
-      <v-text-field
-        label="Start Command (optional)"
-        :value="startCmd"
-        @change="startCmd = $event"
-        filled
-        prepend-icon="mdi-console-line"
-        append-icon="mdi-folder-open"
-        @click:append="pickPath('startCmd')"
-      />
+      <profile-config class="my-4" />
       <MinerController />
       <v-divider class="my-4" />
       <ResetSettings />
