@@ -1,45 +1,3 @@
-<template>
-  <v-app>
-    <v-main class="pa-8" v-if="storeReady">
-      <p class="display-1 d-flex">
-        <span class="flex-grow-1"> Configuration </span>
-        <v-btn @click="refreshStore()">
-          <v-icon> mdi-refresh </v-icon>
-        </v-btn>
-      </p>
-      <v-text-field
-        :value="minerPath"
-        @change="minerPath = $event"
-        label="Path to miner executable"
-        filled
-        prepend-icon="mdi-pickaxe"
-        append-icon="mdi-folder-open"
-        :rules="[required]"
-        @click:append="pickPath('minerPath')"
-      />
-      <v-text-field
-        label="Start Command (optional)"
-        :value="startCmd"
-        @change="startCmd = $event"
-        filled
-        prepend-icon="mdi-console-line"
-        append-icon="mdi-folder-open"
-        @click:append="pickPath('startCmd')"
-      />
-      <MinerController />
-      <v-divider class="my-4" />
-      <ResetSettings />
-    </v-main>
-    <v-footer padless>
-      <v-col class="text-center" cols="12">
-        <a @click="openGithub">GitHub</a>
-        -
-        {{ version }} {{ channel ? `(${channel})` : '' }}
-      </v-col>
-    </v-footer>
-  </v-app>
-</template>
-
 <script lang="ts">
 import { defineComponent, computed, ref } from '@vue/composition-api';
 import {
@@ -126,3 +84,45 @@ export default defineComponent({
   },
 });
 </script>
+
+<template>
+  <v-app>
+    <v-main class="pa-8" v-if="storeReady">
+      <p class="display-1 d-flex">
+        <span class="flex-grow-1"> Configuration </span>
+        <v-btn @click="refreshStore()">
+          <v-icon> mdi-refresh </v-icon>
+        </v-btn>
+      </p>
+      <v-text-field
+        :value="minerPath"
+        @change="minerPath = $event"
+        label="Path to miner executable"
+        filled
+        prepend-icon="mdi-pickaxe"
+        append-icon="mdi-folder-open"
+        :rules="[required]"
+        @click:append="pickPath('minerPath')"
+      />
+      <v-text-field
+        label="Start Command (optional)"
+        :value="startCmd"
+        @change="startCmd = $event"
+        filled
+        prepend-icon="mdi-console-line"
+        append-icon="mdi-folder-open"
+        @click:append="pickPath('startCmd')"
+      />
+      <MinerController />
+      <v-divider class="my-4" />
+      <ResetSettings />
+    </v-main>
+    <v-footer padless>
+      <v-col class="text-center" cols="12">
+        <a @click="openGithub">GitHub</a>
+        -
+        {{ version }} {{ channel ? `(${channel})` : '' }}
+      </v-col>
+    </v-footer>
+  </v-app>
+</template>
