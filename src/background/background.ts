@@ -3,12 +3,13 @@
 import { app, protocol, BrowserWindow } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import path from 'path';
-import { store } from './store';
+import './init-vue';
+import { accessor } from '../store';
 import './miner';
-import winAccessor, { useIpcMainChannel } from './util';
 import { autoUpdater } from 'electron-updater';
-
+import ElectronStore from 'electron-store';
 const isDevelopment = process.env.NODE_ENV !== 'production';
+ElectronStore.initRenderer();
 
 // using prerelease from github seems to work
 // 0.0.1 --> 0.0.2
@@ -17,13 +18,17 @@ const isDevelopment = process.env.NODE_ENV !== 'production';
 // 0.0.3-alpha.2 -/-> 0.0.3-alpha
 
 console.log(`version: ${JSON.stringify(autoUpdater.currentVersion)}`);
-autoUpdater.channel = store.get('channel');
+autoUpdater.channel = accessor.channel;
 console.log(`channel: ${autoUpdater.channel}`);
-useIpcMainChannel('get-version', (event, reply) => {
-  reply(autoUpdater.currentVersion.version, autoUpdater.channel || '');
-});
+accessor.setVersion(autoUpdater.currentVersion.version);
+if (accessor.channel === '') {
+  console.log('channel is not set, defaulting it...');
+  accessor.setChannel(
+    String(autoUpdater.currentVersion.prerelease[0] || 'latest')
+  );
+}
 
-// TODO uncaught handler
+// TODO add uncaught handler
 
 // conditionally install devtools
 if (isDevelopment && !process.env.IS_TEST) {
@@ -57,12 +62,9 @@ async function createWindow() {
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: (process.env
         .ELECTRON_NODE_INTEGRATION as unknown) as boolean,
-      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION,
     },
   });
-
-  // store the main window so emitters know the target
-  winAccessor.set(win);
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode

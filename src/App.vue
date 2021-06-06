@@ -1,12 +1,8 @@
 <script lang="ts">
-import { defineComponent, computed, ref } from '@vue/composition-api';
-import {
-  useRemoteStoreProp,
-  refreshStore,
-  useIpcRendererChannel,
-} from './util';
+import { defineComponent, computed, watch } from '@vue/composition-api';
 import { ResetSettings } from './components/ResetSettings.vue';
 import { MinerController } from './components/MinerController.vue';
+import { accessor, PathId } from './store';
 
 export default defineComponent({
   name: 'App',
@@ -15,67 +11,48 @@ export default defineComponent({
     MinerController,
   },
   setup() {
-    const minerPath = useRemoteStoreProp('minerPath');
-    const startCmd = useRemoteStoreProp('startCmd');
-    refreshStore();
+    // TODO prevent editing minerPath while miner is running
 
-    const { send: sendPickPath } = useIpcRendererChannel(
-      'pick-path',
-      (event, pathId, result) => {
-        switch (pathId) {
-          case 'minerPath':
-            minerPath.value = result.filePaths[0]
-              ? `"${result.filePaths[0]}"`
-              : '';
-            break;
-          case 'startCmd':
-            startCmd.value = result.filePaths[0]
-              ? `"${result.filePaths[0]}"`
-              : '';
-            break;
-          default:
-            return;
-        }
-      }
-    );
-
-    const version = ref('');
-    const channel = ref('');
-    const { send: sendGetVersion } = useIpcRendererChannel(
-      'get-version',
-      (event, versionReply, channelReply) => {
-        version.value = versionReply;
-        channel.value = channelReply;
-      }
-    );
-    sendGetVersion();
-
-    useIpcRendererChannel('server-error', (event, error) => {
-      // TODO handle
+    const version = computed(() => accessor.version);
+    const channel = computed(() => accessor.channel);
+    const minerPath = computed({
+      get: () => accessor.minerPath,
+      set: (val) => accessor.requestSetPath({ pathId: 'minerPath', path: val }),
+    });
+    const startCmd = computed({
+      get: () => accessor.startCmd,
+      set: (val) => accessor.requestSetStartCmd(val),
     });
 
-    const { send: sendOpenGithub } = useIpcRendererChannel('open-github');
+    // when the miner path changes, recheck
+    // this is done on the client because the server doesn't really care
+    watch(minerPath, () => {
+      accessor.checkMinerStatus();
+    });
 
     return {
-      refreshStore,
+      refreshStore: async () => {
+        console.log(await accessor.refreshStore());
+      },
       storeReady: computed(() => minerPath.value !== null),
       minerPath,
       startCmd,
       version,
       channel,
-      openGithub() {
-        sendOpenGithub();
-      },
-      pickPath(pathId: string) {
-        sendPickPath(pathId, {
-          title: 'Set the file path to the miner executable',
-          properties: ['openFile'],
-          filters: [
-            {
-              name: 'Executable',
-              extensions: ['exe', 'bat'],
-            },
-          ],
+      openGithub: () => accessor.openGithub(),
+      pickPath(pathId: PathId) {
+        accessor.pickPath({
+          pathId,
+          opts: {
+            title: 'Set the file path to the miner executable',
+            properties: ['openFile'],
+            filters: [
+              {
+                name: 'Executable',
+                extensions: ['exe', 'bat'],
+              },
+            ],
+          },
         });
       },
       required: (val: string | null) =>

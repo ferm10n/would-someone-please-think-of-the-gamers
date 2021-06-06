@@ -1,9 +1,12 @@
-import { useIpcMainChannel, sendError, windowAccessor } from './util';
-import { store } from './store';
+import './init-vue';
+import { accessor } from '../store';
 import { execSync, exec, ChildProcess } from 'child_process';
 import parseCsv from 'csv-parse/lib/sync';
 import { MinerStatus } from '../../types';
 import readline from 'readline';
+import { watch } from '@vue/composition-api';
+
+// TODO if miner is started externally, check its status on an interval. otherwise we should be able to rely on event handlers on the child process
 
 // TODO maybe check if multiple instances are detected, to prevent someone killing a proc they shouldn't. would only need to handle this in the kill handler
 
@@ -11,9 +14,16 @@ let minerChild: ChildProcess | null = null;
 
 // the miner status should not be sent if there is no minerPath. this should preserve the "unknown" state in the renderer.
 
-function getMinerStatus(minerPath: string): MinerStatus {
+export function getMinerStatus(): MinerStatus {
+  // method 1: check if `minerChild` is alive
+  // if (minerChild) {
+  //   minerChild.
+  // }
+
+  // method 2: check if miner is started externally
   try {
     // TODO check for valid miner path?
+    const minerPath = accessor.minerPath;
 
     // look for running miner
     const resultStr = execSync(
@@ -48,7 +58,7 @@ function getMinerStatus(minerPath: string): MinerStatus {
       };
     }
   } catch (err) {
-    sendError({ message: 'Failed to get miner status', ...err });
+    accessor.setError({ message: 'Failed to get miner status', ...err });
     return {
       external: false,
       status: 'unknown',
@@ -57,75 +67,53 @@ function getMinerStatus(minerPath: string): MinerStatus {
   }
 }
 
-const { send: sendMinerStatus } = useIpcMainChannel(
-  'get-miner-status',
-  (event, reply) => {
-    const minerPath = store.get('minerPath');
-    if (minerPath.length > 0) {
-      reply(getMinerStatus(minerPath));
-    }
-  }
-);
-
-// when the miner path changes, recheck
-store.onDidChange('minerPath', () => {
-  const minerPath = store.get('minerPath');
-  const win = windowAccessor.get();
-  if (minerPath.length > 0 && win) {
-    sendMinerStatus(win.webContents, getMinerStatus(minerPath));
-  } else if (win) {
-    sendMinerStatus(win.webContents, {
-      status: 'unknown',
-      external: false,
-      pids: [],
-    });
-  }
-});
-
 // TODO on every check, should set the minerChild to null if it's external
 
-const { send: sendMinerLog } = useIpcMainChannel('miner-log');
+watch(
+  // this should only ever be changed by the action, which will ensure the miner status is up to date
+  () => accessor.desiredMinerStatus,
+  (desiredMinerStatus) => {
+    const minerPath = accessor.minerPath;
+    const minerStatus = accessor.minerStatus.status;
 
-useIpcMainChannel('toggle-miner', (event, reply, desired) => {
-  const minerPath = store.get('minerPath');
+    // abort if miner cannot be controlled yet
+    if (
+      accessor.canChangeMinerStatus ||
+      minerStatus === 'unknown' ||
+      desiredMinerStatus === minerStatus ||
+      desiredMinerStatus === 'unknown'
+    ) {
+      return;
+    }
 
-  // abort if miner cannot be controlled yet
-  if (!minerPath) {
-    return;
-  }
-
-  const minerStatus = getMinerStatus(minerPath);
-
-  if (desired && minerStatus.status === 'stopped') {
-    // start the miner
-    minerChild = exec(store.get('startCmd') || minerPath);
-    const win = windowAccessor.get();
-    if (minerChild.stdout) {
-      minerChild.stdout.pipe(process.stdout);
-      if (win) {
+    if (desiredMinerStatus === 'running' && minerStatus === 'stopped') {
+      // start the miner
+      const startCmd = accessor.startCmd || minerPath; // TODO do I need to wrap quotes around the minerPath?
+      minerChild = exec(startCmd);
+      minerChild.on('error', () => {
+        accessor.setDesiredMinerStatus('stopped');
+      });
+      minerChild.on('exit', () => {
+        accessor.setDesiredMinerStatus('stopped');
+      });
+      if (minerChild.stdout) {
+        minerChild.stdout.pipe(process.stdout);
         readline
           .createInterface(minerChild.stdout)
-          .on('line', (l) => sendMinerLog(win.webContents, l));
+          .on('line', (l) => accessor.addLogLine(l));
       }
-    }
-    if (minerChild.stderr) {
-      minerChild.stderr.pipe(process.stderr);
-      if (win) {
+      if (minerChild.stderr) {
+        minerChild.stderr.pipe(process.stderr);
         readline
           .createInterface(minerChild.stderr)
-          .on('line', (l) => sendMinerLog(win.webContents, l));
+          .on('line', (l) => accessor.addLogLine(l));
+      }
+    } else if (desiredMinerStatus === 'stopped' && minerStatus === 'running') {
+      // kill the miner
+      for (const pid of accessor.minerStatus.pids) {
+        process.kill(Number(pid), 'SIGINT');
       }
     }
-    reply(true);
-  } else if (!desired && minerStatus.status === 'running') {
-    // kill the miner
-    for (const pid of minerStatus.pids) {
-      process.kill(Number(pid), 'SIGINT');
-      reply(true);
-    }
-  } else {
-    // the renderer must be out of sync
-    sendMinerStatus(event.sender, minerStatus);
-    reply(false);
-  }
-});
+  },
+  { immediate: true }
+);

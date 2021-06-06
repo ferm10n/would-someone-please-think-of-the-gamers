@@ -4,6 +4,7 @@ import Vue, { Component } from 'vue';
 import './plugins';
 import Vuetify from 'vuetify/lib/framework';
 import App from './App.vue';
+import { store } from './store';
 
 const vuetify = new Vuetify({
   icons: { iconfont: 'mdi' },
@@ -23,4 +24,5 @@ const vuetify = new Vuetify({
 new Vue({
   vuetify,
   render: (h) => h(App as Component),
+  store,
 }).$mount('#app');

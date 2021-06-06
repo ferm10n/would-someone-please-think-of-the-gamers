@@ -1,16 +1,15 @@
 <script lang="ts">
-import { useIpcRendererChannel } from '@/util';
+import { accessor } from '@/store';
 import { defineComponent, ref } from '@vue/composition-api';
 
 export const ResetSettings = defineComponent({
   name: 'ResetSettings',
   setup() {
     const resetDialog = ref(false);
-    const { send: sendStoreReset } = useIpcRendererChannel('store-reset');
     return {
       resetDialog,
       resetStore: () => {
-        sendStoreReset();
+        accessor.resetCfg();
         resetDialog.value = false;
       },
     };

@@ -1,0 +1,5 @@
+dist
+node_modules
+src/gql/db.ts
+src/gql/types.ts
+dist_electron
