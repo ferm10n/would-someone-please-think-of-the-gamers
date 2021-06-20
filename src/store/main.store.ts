@@ -5,6 +5,13 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import { mutations, getters, PathId, plugins } from './shared.store';
 import { OpenDialogOptions } from 'electron/main';
+import { createPersistedState } from '@ferm10n/vuex-electron/dist';
+import { autoUpdater } from 'electron-updater';
+import ElectronStore from 'electron-store';
+
+const STORAGE_NAME = 'vuex';
+const STORAGE_KEY = 'state';
+const storage = new ElectronStore({ name: STORAGE_NAME });
 
 export type RootState = {
   version: string;
@@ -20,8 +27,9 @@ export type RootState = {
 };
 
 export const state = (): RootState => ({
-  version: '',
-  channel: '',
+  version: autoUpdater.currentVersion.version,
+  /** this value will be replaced by whatever is in the store */
+  channel: String(autoUpdater.currentVersion.prerelease[0] || 'latest'),
   minerPath: '',
   startCmd: '',
   // TODO handle when this is received on the client
@@ -45,17 +53,18 @@ export const actions = actionTree(
   },
   {
     /** when requested by the UI, show a path picker dialog */
-    async pickPath(ctx, payload: { pathId: PathId; opts: OpenDialogOptions }) {
+    async pickPath(
+      { commit },
+      payload: { pathId: PathId; opts: OpenDialogOptions }
+    ) {
       const pickResult = await dialog.showOpenDialog(payload.opts);
-      accessor.setPath({
-        pathId: payload.pathId,
-        path: pickResult.filePaths[0] || '',
-      });
+
+      accessor.patchState({ [payload.pathId]: pickResult.filePaths[0] || '' });
     },
-    async resetCfg({ state }) {
+    async resetCfg({ state: currentState, commit }) {
       // TODO prevent if miner is running internally
-      state.minerPath = '';
-      state.startCmd = '';
+      storage.delete(STORAGE_KEY);
+      commit('patchState', state());
     },
     openGithub() {
       shell.openExternal(accessor.homepage);
@@ -68,7 +77,7 @@ export const actions = actionTree(
     },
     async checkMinerStatus() {
       const { getMinerStatus } = await import('../background/miner');
-      accessor.updateMinerStatus(getMinerStatus());
+      accessor.patchState({ minerStatus: getMinerStatus() });
     },
     async toggleMiner(ctx, desiredStatus?: MinerStatus['status']) {
       // changing miner status does not work unless the current miner status is known
@@ -80,18 +89,9 @@ export const actions = actionTree(
       }
 
       if (accessor.canChangeMinerStatus) {
-        accessor.setDesiredMinerStatus(desiredStatus);
+        accessor.patchState({ desiredMinerStatus: desiredStatus });
         await accessor.checkMinerStatus();
       }
-    },
-    requestSetPath(ctx, payload: { pathId: PathId; path: string }) {
-      ctx.commit('setPath', payload);
-    },
-    requestSetStartCmd(ctx, cmd: string) {
-      ctx.commit('setStartCmd', cmd);
-    },
-    requestSetShowMinerLogs(ctx, show: boolean) {
-      ctx.commit('setShowMinerLogs', show);
     },
   }
 );
@@ -101,7 +101,22 @@ const storePattern = {
   mutations,
   getters,
   actions,
-  plugins,
+  plugins: [
+    createPersistedState({
+      whitelist: [
+        'channel',
+        'minerPath',
+        'startCmd',
+        'maxLogLength',
+        'showMinerLogs',
+        'desiredMinerStatus',
+      ],
+      storage,
+      storageKey: STORAGE_KEY,
+      storageName: STORAGE_NAME,
+    }),
+    ...plugins,
+  ],
 };
 
 export type StorePattern = typeof storePattern;
@@ -111,7 +126,5 @@ export const store = new Vuex.Store(storePattern);
 export const accessor = useAccessor(store, storePattern);
 
 ipcMain.on('vuex-get-store-state', (event) => {
-  const myState = state();
-  console.log('remote state requested', myState);
-  event.returnValue = myState;
+  event.returnValue = store.state;
 });

@@ -13,26 +13,6 @@ import { getterTree, mutationTree } from 'typed-vuex';
 export type PathId = 'minerPath' | 'startCmd';
 
 export const mutations = mutationTree({} as RootState, {
-  setChannel(state, channel) {
-    state.channel = channel;
-  },
-  setPath(state, payload: { pathId: PathId; path: string }) {
-    state[payload.pathId] = payload.path;
-
-    // avoid unneeded starts/stops when the minerPath changes
-    if (payload.pathId === 'minerPath') {
-      state.desiredMinerStatus = 'unknown';
-    }
-  },
-  setStartCmd(state, cmd: string) {
-    state.startCmd = cmd;
-  },
-  setError(state, error: RootState['error']) {
-    state.error = error;
-  },
-  updateMinerStatus(state, minerStatus: MinerStatus) {
-    state.minerStatus = minerStatus;
-  },
   addLogLine(state, logLine) {
     state.minerLogs.push(logLine);
     while (state.minerLogs.length > state.maxLogLength) {
@@ -42,17 +22,6 @@ export const mutations = mutationTree({} as RootState, {
   // TODO use this somewhere
   resetMinerLogs(state) {
     state.minerLogs = [];
-  },
-  // this should only ever be called in the toggleMiner action
-  // we would set the desired miner status in the action too, except that mutations get persisted to disk
-  setDesiredMinerStatus(state, status: MinerStatus['status']) {
-    state.desiredMinerStatus = status;
-  },
-  setVersion(state, version: string) {
-    state.version = version;
-  },
-  setShowMinerLogs(state, show: boolean) {
-    state.showMinerLogs = show;
   },
   patchState(state, patch: Partial<RootState>) {
     merge(state, patch);
@@ -78,14 +47,4 @@ export const getters = getterTree({} as RootState, {
   },
 });
 
-export const plugins = [
-  createPersistedState({
-    blacklist: [
-      'setError',
-      'updateMinerStatus',
-      'addLogLine',
-      'resetMinerLogs',
-    ] as (keyof typeof mutations)[],
-  }),
-  createSharedMutations(),
-];
+export const plugins = [createSharedMutations()];

@@ -58,7 +58,9 @@ export function getMinerStatus(): MinerStatus {
       };
     }
   } catch (err) {
-    accessor.setError({ message: 'Failed to get miner status', ...err });
+    accessor.patchState({
+      error: { message: 'Failed to get miner status', ...err },
+    });
     return {
       external: false,
       status: 'unknown',
@@ -68,6 +70,14 @@ export function getMinerStatus(): MinerStatus {
 }
 
 // TODO on every check, should set the minerChild to null if it's external
+
+// avoid unneeded starts/stops when the minerPath changes
+watch(
+  () => accessor.minerPath,
+  () => {
+    accessor.patchState({ desiredMinerStatus: 'unknown' });
+  }
+);
 
 watch(
   // this should only ever be changed by the action, which will ensure the miner status is up to date
@@ -91,10 +101,10 @@ watch(
       const startCmd = accessor.startCmd || minerPath; // TODO do I need to wrap quotes around the minerPath?
       minerChild = exec(startCmd);
       minerChild.on('error', () => {
-        accessor.setDesiredMinerStatus('stopped');
+        accessor.patchState({ desiredMinerStatus: 'stopped' });
       });
       minerChild.on('exit', () => {
-        accessor.setDesiredMinerStatus('stopped');
+        accessor.patchState({ desiredMinerStatus: 'stopped' });
       });
       if (minerChild.stdout) {
         minerChild.stdout.pipe(process.stdout);

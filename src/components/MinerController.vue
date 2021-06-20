@@ -67,7 +67,8 @@ export const MinerController = defineComponent({
     const minerLogs = computed(() => accessor.minerLogs);
     const showMinerLogs = computed({
       get: () => (accessor.showMinerLogs === true ? 0 : null),
-      set: (val) => accessor.requestSetShowMinerLogs(val === 0 ? true : false),
+      set: (val) =>
+        accessor.patchState({ showMinerLogs: val === 0 ? true : false }),
     });
 
     return {

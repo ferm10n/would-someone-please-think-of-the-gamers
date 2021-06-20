@@ -18,11 +18,13 @@ export default defineComponent({
     const channel = computed(() => accessor.channel);
     const minerPath = computed({
       get: () => accessor.minerPath,
-      set: (val) => accessor.patchState({ minerPath: val }),
+      set: (val) => {
+        accessor.patchState({ minerPath: val });
+      },
     });
     const startCmd = computed({
       get: () => accessor.startCmd,
-      set: (val) => accessor.setStartCmd(val),
+      set: (val) => accessor.patchState({ startCmd: val }),
     });
 
     // when the miner path changes, recheck
@@ -87,6 +89,7 @@ export default defineComponent({
         :value="startCmd"
         @change="startCmd = $event"
         filled
+        clearable
         prepend-icon="mdi-console-line"
         append-icon="mdi-folder-open"
         @click:append="pickPath('startCmd')"

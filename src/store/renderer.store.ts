@@ -5,6 +5,11 @@ import { useAccessor } from 'typed-vuex';
 import { ipcRenderer } from 'electron';
 import { getters, mutations, plugins } from './shared.store';
 
+// implementations for actions need access to main proc stuff,
+// which I don't want to use in the renderer.
+// However, in order for typed-vuex to work, the actions object
+// needs keys to real functions.
+// This is my workaround for this right now.
 const actions: {
   [action in keyof StorePattern['actions']]: () => void;
 } = {
@@ -12,9 +17,6 @@ const actions: {
   openGithub: () => {},
   pickPath: () => {},
   refreshStore: () => {},
-  requestSetPath: () => {},
-  requestSetShowMinerLogs: () => {},
-  requestSetStartCmd: () => {},
   resetCfg: () => {},
   toggleMiner: () => {},
 };
