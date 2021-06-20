@@ -1,5 +1,5 @@
 <script lang="ts">
-import { accessor } from '@/store';
+import { accessor } from '@/store/renderer.store';
 import { defineComponent, ref } from '@vue/composition-api';
 
 export const ResetSettings = defineComponent({

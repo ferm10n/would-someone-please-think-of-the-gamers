@@ -2,21 +2,21 @@ module.exports = {
   pluginOptions: {
     electronBuilder: {
       mainProcessFile: 'src/background/background.ts',
+      rendererProcessFile: 'src/renderer.ts',
       mainProcessWatch: [
         'src/background**/*.ts',
         'src/store.ts',
-        // 'src/preload.ts',
+        'src/store/main.store.ts',
       ],
-      // preload: 'src/preload.ts',
       /**
        * @param {import('webpack-chain')} config
        */
       chainWebpackRendererProcess(config) {
         // config.target('electron-renderer');
-        config.resolve.alias.set(
-          './background/miner',
-          require.resolve('./src/shim.remote-only.ts')
-        );
+        // config.resolve.alias.set(
+        //   './background/miner',
+        //   require.resolve('./src/shim.remote-only.ts')
+        // );
 
         config.resolve.alias.set('electron', require.resolve('electron'));
         config.resolve.alias.set(

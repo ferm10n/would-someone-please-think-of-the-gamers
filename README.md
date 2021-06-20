@@ -27,26 +27,26 @@ More features will be pushed out, and the exe has auto-updating built in.
 Just install deps: `$ yarn`
 
 Then you can do
+
 - `$ yarn start` - dev mode
 - `$ yarn build` - build exe
-
 
 ## TODOs
 
 - configs (UI / Implementation)
-    - ([x] / [x]) miner path
-    - ([x] / [x]) custom start command
-    - ([x] / [x]) start and stop control
+  - ([x] / [x]) miner path
+  - ([x] / [x]) custom start command
+  - ([x] / [x]) start and stop control
 - [x] visualize whether the miner was started by the manager
 - [x] detect if the miner is running
 - [x] start miner exe from UI
 - [x] capture and show miner output in UI
 - built application touchups
-    - [ ] exe icons
-    - [ ] proper title and description
-    - [ ] appId
-    - [ ] remove window top bar
-    - [x] exe name
+  - [ ] exe icons
+  - [ ] proper title and description
+  - [ ] appId
+  - [ ] remove window top bar
+  - [x] exe name
 - [ ] log to file arg flag
 - [ ] toggle advanced options
 - [ ] add tested miners in README section

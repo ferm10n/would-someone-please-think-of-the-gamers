@@ -4,7 +4,7 @@ import { app, protocol, BrowserWindow } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import path from 'path';
 import './init-vue';
-import { accessor } from '../store';
+import { accessor } from '../store/main.store';
 import './miner';
 import { autoUpdater } from 'electron-updater';
 import ElectronStore from 'electron-store';
@@ -17,16 +17,17 @@ ElectronStore.initRenderer();
 // 0.0.3-alpha --> 0.0.3-alpha.2
 // 0.0.3-alpha.2 -/-> 0.0.3-alpha
 
-console.log(`version: ${JSON.stringify(autoUpdater.currentVersion)}`);
+// TODO these should be moved into main.store
+// console.log(`version: ${JSON.stringify(autoUpdater.currentVersion)}`);
 autoUpdater.channel = accessor.channel;
-console.log(`channel: ${autoUpdater.channel}`);
-accessor.setVersion(autoUpdater.currentVersion.version);
-if (accessor.channel === '') {
-  console.log('channel is not set, defaulting it...');
-  accessor.setChannel(
-    String(autoUpdater.currentVersion.prerelease[0] || 'latest')
-  );
-}
+// console.log(`channel: ${autoUpdater.channel}`);
+// accessor.setVersion(autoUpdater.currentVersion.version);
+// if (accessor.channel === '') {
+//   console.log('channel is not set, defaulting it...');
+//   accessor.setChannel(
+//     String(autoUpdater.currentVersion.prerelease[0] || 'latest')
+//   );
+// }
 
 // TODO add uncaught handler
 

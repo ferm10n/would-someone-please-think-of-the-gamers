@@ -1,5 +1,5 @@
 import './init-vue';
-import { accessor } from '../store';
+import { accessor } from '../store/main.store';
 import { execSync, exec, ChildProcess } from 'child_process';
 import parseCsv from 'csv-parse/lib/sync';
 import { MinerStatus } from '../../types';

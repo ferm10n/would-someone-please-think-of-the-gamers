@@ -4,7 +4,7 @@ import Vue, { Component } from 'vue';
 import './plugins';
 import Vuetify from 'vuetify/lib/framework';
 import App from './App.vue';
-import { store } from './store';
+import { store } from './store/renderer.store';
 
 const vuetify = new Vuetify({
   icons: { iconfont: 'mdi' },

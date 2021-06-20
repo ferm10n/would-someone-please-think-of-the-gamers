@@ -28,6 +28,7 @@
     "csv-parse": "^4.15.4",
     "electron-store": "^8.0.0",
     "electron-updater": "^4.3.8",
+    "lodash.merge": "^4.6.2",
     "typed-vuex": "^0.2.0",
     "vuex": "^3.6.2"
   },
@@ -36,6 +37,7 @@
     "@commitlint/config-conventional": "^12.1.1",
     "@mdi/font": "^5.9.55",
     "@types/electron-devtools-installer": "^2.2.0",
+    "@types/lodash.merge": "^4.6.6",
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-typescript": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
@@ -69,8 +71,5 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ferm10n/would-someone-please-think-of-the-gamers.git"
-  },
-  "prettier": {
-    "singleQuote": true
   }
 }

@@ -2,7 +2,8 @@
 import { defineComponent, computed, watch } from '@vue/composition-api';
 import { ResetSettings } from './components/ResetSettings.vue';
 import { MinerController } from './components/MinerController.vue';
-import { accessor, PathId } from './store';
+import { accessor } from './store/renderer.store';
+import type { PathId } from './store/shared.store';
 
 export default defineComponent({
   name: 'App',
@@ -17,11 +18,11 @@ export default defineComponent({
     const channel = computed(() => accessor.channel);
     const minerPath = computed({
       get: () => accessor.minerPath,
-      set: (val) => accessor.requestSetPath({ pathId: 'minerPath', path: val }),
+      set: (val) => accessor.patchState({ minerPath: val }),
     });
     const startCmd = computed({
       get: () => accessor.startCmd,
-      set: (val) => accessor.requestSetStartCmd(val),
+      set: (val) => accessor.setStartCmd(val),
     });
 
     // when the miner path changes, recheck
